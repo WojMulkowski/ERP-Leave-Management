@@ -1,3 +1,4 @@
+<? session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,12 +7,13 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="loginHandler.php" method="post">
+    <form action="../scripts/loginHandler.php" method="post">
         <label for="form-label-email">Email</label>
         <input type="text" name="email" id="form-label-email" required><br>
         <label for="form-label-password">Hasło</label>
         <input type="text" name="password" id="form-label-password" required><br>
-        <button type="submit">Zaloguj się</button>
+        <?php if (isset($_SESSION['error'])) echo "<p>".$_SESSION['error']."</p>"; ?>
+        <button type="submit" name="submit">Zaloguj się</button>
     </form>
 </body>
 </html>
