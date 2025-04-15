@@ -37,13 +37,13 @@ CREATE TABLE leaves (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     days_count INT NOT NULL,
-    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    status ENUM('Oczekujący', 'Zatwierdzony', 'Odrzucony') NOT NULL DEFAULT 'Oczekujący',
     notes VARCHAR(255),
     CHECK (start_date <= end_date),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 INSERT INTO leaves (user_id, start_date, end_date, days_count, status, notes) VALUES
-(1, '2025-06-01', '2025-06-10', 10, 'pending', 'Urlop wakacyjny'),
-(2, '2025-04-15', '2025-04-20', 6, 'approved', 'Wyjazd rodzinny'),
-(3, '2025-09-01', '2025-09-15', 15, 'rejected', 'Za dużo wniosków na ten termin');
+(1, '2025-06-01', '2025-06-10', 10, 'Oczekujący', 'Urlop wakacyjny'),
+(2, '2025-04-15', '2025-04-20', 6, 'Zatwierdzony', 'Wyjazd rodzinny'),
+(3, '2025-09-01', '2025-09-15', 15, 'Odrzucony', 'Za dużo wniosków na ten termin');
