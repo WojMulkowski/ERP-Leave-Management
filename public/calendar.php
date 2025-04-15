@@ -112,7 +112,9 @@ $holidays = fetchPolishHolidays($selectedYear);
 
                                 foreach ($leavesData as $leave) {
                                     if ($date >= $leave['startDate'] && $date <= $leave['endDate']) {
-                                        echo '<div class="leave.approved">Urlop</div>';
+                                        echo '<div class="leave">';
+                                        echo '<div class="approved">Urlop</div>';
+                                        echo '</div>';
                                     }
                                 }
 
