@@ -1,0 +1,40 @@
+.day {
+    min-height: 100px;
+}
+
+.leave {
+    height: 50px;
+}
+
+.leave .approved {
+    background-color: green;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+}
+
+select.form-select {
+    font-size: 16px;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+select.form-select:focus {
+    background-color: #fff;
+    border-color: #5e72e4;
+    box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.25);
+}
+
+.holiday {
+    background-color: #ffe4e1;
+    border: 1px solid #ff4500;
+}
+
+.holiday .text-danger {
+    font-size: 14px;
+    margin-top: 5px;
+}
