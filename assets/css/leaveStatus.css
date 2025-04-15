@@ -1,0 +1,33 @@
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+.table td .text-secondary {
+    font-style: italic;
+    color: #6c757d;
+}
+.table thead th {
+    background-color: #f8f9fa;
+    color: #344767;
+    font-weight: 600;
+    text-align: center;
+}
+.table tbody tr:hover {
+    background-color: #f2f4f7;
+}
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+.status-zatwierdzony {
+    color: #28a745;
+    font-weight: bold;
+}
+.status-odrzucony {
+    color: #dc3545;
+    font-weight: bold;
+}
+.status-oczekujący {
+    color: #ffc107;
+    font-weight: bold;
+}
