@@ -1,0 +1,29 @@
+body {
+    background: url('../img/beach.png') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.2); /* 20% ciemności */
+    z-index: 0;
+}
+
+.login-container {
+    backdrop-filter: blur(4px);
+    position: relative;
+    z-index: 1;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 1rem;
+    background-color: white;
+}
