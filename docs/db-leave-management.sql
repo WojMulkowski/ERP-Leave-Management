@@ -29,7 +29,7 @@ CREATE TABLE users (
 INSERT INTO users (firstname, lastname, email, password, birth_date, gender, role_id, employed_from) VALUES 
 ('User', 'User', 'user@example.com', 'qwe123', '2001-05-15', 'male', 1, '2015-06-01'),
 ('Moderator', 'Moderator', 'moderator@example.com', 'qwe123', '2000-08-20', 'female', 2, '2018-03-15'),
-('Admin', 'Admin', 'admin@example.com', 'qwe123', '1998', 'male', 3, '2010-01-10');
+('Admin', 'Admin', 'admin@example.com', 'qwe123', '1998-07-15', 'male', 3, '2010-01-10');
 
 CREATE TABLE leaves (
     id INT AUTO_INCREMENT PRIMARY KEY,
