@@ -1,8 +1,12 @@
 <?php
+$config = require '../config.php';
 echo <<<sidebar
 <div class="d-flex flex-column flex-shrink-0 p-2 bg-dark text-white vh-100 position-fixed"
-     style="width: 250px; left: 0; top: 0; bottom: 0; overflow-y: auto;">
-    <h3 class="text-center mt-3">ERP System</h3>
+    style="width: 250px; left: 0; top: 0; bottom: 0; overflow-y: auto;">
+    <div class="d-flex align-items-center justify-content-center mt-3 mb-2 bg-white rounded-3 p-2 mx-auto">
+        <img src="{$config['logo']}" alt="Logo firmy" height="32" class="me-2">
+        <span class="fs-6 fw-semibold text-dark">{$config['site_name']}</span>
+    </div>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto text-center mx-3">
 sidebar;
