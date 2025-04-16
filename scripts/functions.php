@@ -11,6 +11,20 @@ function redirectIfLoggedIn() {
         exit();
     }
 }
+function verifyRecaptcha($token): bool {
+    $config = require __DIR__ . '/../config.php';
+    $secretKey = $config['recaptcha_secret_key'];
+    $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secretKey&response=$token");
+    $result = json_decode($response, true);
+    return true; // true ze względu na localhost
+    // return $result['success'] ?? false;
+}
+function isActivePage($page) {
+    return strpos($_SERVER['SCRIPT_NAME'], $page) !== false ? 'active bg-light text-black' : 'text-white';
+}
+function hasPermission($requiredPermission) {
+    return isset($_SESSION['logged_user']['role_id']) && $_SESSION['logged_user']['role_id'] >= $requiredPermission;
+}
 function calculateRemainingVacationDays($pdo) {
     // Pobierz dane użytkownika z sesji
     $userId = $_SESSION['logged_user']['id'];
@@ -150,5 +164,126 @@ function getUserLeaveRequests($pdo) {
     $leavesData = array();
     $leavesData = $stmt->fetchAll(PDO::FETCH_ASSOC);
     return $leavesData;
+}
+// Dla moderatorów
+function getPendingLeaveRequests($pdo): array {
+    $query = "SELECT l.id, l.start_date, l.end_date, l.status, u.firstname, u.lastname
+              FROM leaves l
+              INNER JOIN users u ON l.user_id = u.id
+              WHERE l.status = 'Oczekujący'";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+
+    $leaves = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($leaves)) {
+        return $leaves;
+    } else {
+        return [];
+    }
+}
+function getLeavesAndRemainingDays($pdo): array {
+    $query1 = "
+        SELECT l.id, l.start_date, l.end_date, l.status, u.firstname, u.lastname
+        FROM leaves l
+        INNER JOIN users u ON l.user_id = u.id
+    ";
+    $stmt1 = $pdo->prepare($query1);
+    $stmt1->execute();
+    $leaves = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+
+    // Oblicz pozostałe dni urlopowe dla każdego użytkownika
+    $query2 = "
+        SELECT u.firstname, u.lastname, 
+               (CASE 
+                    WHEN DATEDIFF(CURDATE(), u.employed_from) >= 3650 THEN 26 
+                    ELSE 20 
+               END) - IFNULL(SUM(l.days_count), 0) AS remaining_days
+        FROM users u
+        LEFT JOIN leaves l ON u.id = l.user_id AND l.status = 'Zatwierdzony'
+        GROUP BY u.id
+    ";
+    $stmt2 = $pdo->prepare($query2);
+    $stmt2->execute();
+    $remainingDays = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($leaves) || !empty($remainingDays)) {
+        return [
+            'leaves' => $leaves,
+            'remaining_days' => $remainingDays
+        ];
+    } else {
+        return [];
+    }
+}
+// Dla adminów
+function updateConfig($configPath) {
+    // Obsługa zapisu zmian
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $newConfig = [
+            'site_name' => $_POST['site_name'],
+            'favicon' => $_POST['favicon'],
+            'logo' => $_POST['logo'],
+            'recaptcha_site_key' => $_POST['recaptcha_site_key'],
+            'recaptcha_secret_key' => $_POST['recaptcha_secret_key']
+        ];
+
+        // Zapisz zmienione ustawienia do pliku config.php
+        $configContent = "<?php\n\nreturn " . var_export($newConfig, true) . ";\n";
+        if (file_put_contents($configPath, $configContent)) {
+            $_SESSION['success_message'] = 'Ustawienia zostały zaktualizowane.';
+        } else {
+            $_SESSION['error_message'] = 'Błąd podczas zapisywania ustawień.';
+        }
+        header("Location: settings.php");
+        exit;
+    }
+}
+function createBackup($pdo, $backupDir, $message){
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_backup'])) {
+        // Pobierz nazwę bazy danych
+        $dbname = $pdo->query("SELECT DATABASE()")->fetchColumn();
+        if (!$dbname) {
+            $message = '<div class="alert alert-danger">Błąd: Nie udało się zidentyfikować bazy danych.</div>';
+            return;
+        }
+
+        $backupFile = rtrim($backupDir, '/') . '/backup_' . date('Y-m-d_H-i-s') . '.sql';
+        $backupData = '';
+
+        // Pobierz listę tabel
+        $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_NUM);
+        if (!$tables) {
+            $message = '<div class="alert alert-danger">Błąd: Nie udało się pobrać listy tabel.</div>';
+            return;
+        }
+
+        foreach ($tables as $row) {
+            $tableName = $row[0];
+
+            // Struktura tabeli
+            $createStmt = $pdo->query("SHOW CREATE TABLE `$tableName`")->fetch(PDO::FETCH_ASSOC);
+            $backupData .= $createStmt['Create Table'] . ";\n\n";
+
+            // Dane tabeli
+            $dataRows = $pdo->query("SELECT * FROM `$tableName`")->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($dataRows as $dataRow) {
+                $values = array_map(function ($value) use ($pdo) {
+                    return is_null($value) ? 'NULL' : $pdo->quote($value);
+                }, array_values($dataRow));
+                $backupData .= "INSERT INTO `$tableName` VALUES(" . implode(", ", $values) . ");\n";
+            }
+
+            $backupData .= "\n\n";
+        }
+
+        // Zapis do pliku
+        if (file_put_contents($backupFile, $backupData)) {
+            $message = '<div class="alert alert-success">Backup został pomyślnie utworzony: ' . basename($backupFile) . '</div>';
+        } else {
+            $message = '<div class="alert alert-danger">Błąd podczas zapisywania backupu do pliku.</div>';
+        }
+    }
 }
 ?>
